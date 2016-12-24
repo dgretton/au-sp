@@ -181,9 +181,7 @@ class DiscreteAuralSpace(AuralSpace):
             delayed, mod_ir_len = self.correct_delays(data_from_cache, ir_len, destination_location,
                     max_delay_samples=(filter_length - ir_len), start_location=loc)
             decayed = self.apply_decays(delayed, destination_location, start_location=loc)
-            #decayed = self.apply_decays(data_from_cache, destination_location, start_location=loc)
             return (decayed, mod_ir_len)
-            #return (decayed, ir_len)
         return vanilla_post_processor
 
     def _saved_astf_for_location(self, location):
@@ -197,7 +195,6 @@ class DiscreteAuralSpace(AuralSpace):
         return self.name + '_' + '_'.join(['%.3f'%c for c in [t, p, r]]) + ".astfdata"
 
     def _save_out_cache(self):
-        plt.show()
         print "SAVING OUT THE CACHE! YAY! IT WORKED!"
         if not self.astfs:
             print "...but there's nothing to save. aw." 
@@ -264,7 +261,6 @@ class KemarAuralSpace(DiscreteAuralSpace):
             exit()
         path = os.path.join(KemarAuralSpace.hrtf_dir, filename)
         def kas_generate_astf():
-            print filename
             filerate, data = wavfile.read(path)
             raw_data = np.transpose(np.array(data))
             unit_size_data = raw_data.astype(np.float) / (2**15)
@@ -276,7 +272,6 @@ class KemarAuralSpace(DiscreteAuralSpace):
             # complete astf will have minimum possible power of 2 length for efficient fft
             impulse_len = impulse_data.shape[1]
             overall_samples = 2*2**int(log(min_block_len_factor*impulse_len, 2))
-            print "this long:", overall_samples
             hrtf_data = np.fft.rfft(np.hstack((impulse_data,
                 np.zeros((2, overall_samples - impulse_len)))))
             return hrtf_data, impulse_data.shape[1]
