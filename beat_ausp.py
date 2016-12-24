@@ -91,7 +91,7 @@ class Beat:
 
     def set_duration(self, dur, recurse=True):
         if self.has_duration():
-            if self._duration - dur >= .0001:
+            if abs(self._duration - dur) >= .0001:
                 print "Double-assigned a beat's duration somewhere."
                 self.overconstrained_tree()
             else:
