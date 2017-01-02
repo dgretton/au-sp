@@ -116,7 +116,7 @@ class EarDelayAuralSpace(AuralSpace):
 
 class DiscreteAuralSpace(AuralSpace):
 
-    cache_path = os.path.join(os.path.expanduser('~'), ".mu-sp", "cache")
+    cache_path = os.path.join(os.path.expanduser('~'), ".au-sp", "cache")
     metadata_file_name = "meta.json"
     json_loc_property = "loc"
     json_ir_length_property = "ir_len"
@@ -230,7 +230,7 @@ class DiscreteEarDelayAS(DiscreteAuralSpace, EarDelayAuralSpace):
                 key=lambda l:l.cosine_distance_to(Location(location)))[:n]
 
 class KemarAuralSpace(DiscreteAuralSpace):
-    hrtf_dir = os.path.join(os.path.expanduser('~'), ".mu-sp", "hrtf", "kemar")
+    hrtf_dir = os.path.join(os.path.expanduser('~'), ".au-sp", "hrtf", "kemar")
     hrtf_avg_energy = .6
 
     def __init__(self, name, rate):

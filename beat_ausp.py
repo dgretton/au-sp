@@ -62,6 +62,7 @@ class Beat:
         if lunk not in self.linked_beats:
             print "linked", self, "to", lunk
             if lunk.has_duration():
+                print "I GOT EXECUTED< HAPPY DAY>"
                 self.set_duration(lunk.duration())
             self.linked_beats.append(lunk)
             lunk.link(self)
@@ -89,9 +90,13 @@ class Beat:
                 + "durations. Let's tighten this up."
         gdi = 2.0/0
 
+    @staticmethod
+    def durations_close(dur1, dur2):
+        return abs(dur1 - dur2) >= .0001
+
     def set_duration(self, dur, recurse=True):
         if self.has_duration():
-            if abs(self._duration - dur) >= .0001:
+            if Beat.durations_close(self._duration, dur):
                 print "Double-assigned a beat's duration somewhere."
                 self.overconstrained_tree()
             else:
@@ -138,6 +143,7 @@ class Beat:
                     # quietly assign durations to siblings, no higher recursion
                     forced_beat.set_duration(c_beat_shared_dur*forced_beat.size,
                             recurse=False)
+                    forced_beat.enact_local_constraints()
             # otherwise, all of them are unassigned even though they're present, so
             # they'll need to be assigned using time remaining after unconstrained
             else:
@@ -162,6 +168,10 @@ class Beat:
         else:
             print "waiting on", ','.join([str(dof) for dof in dof_list])
 
+        if self.has_duration(): # New assignment was made: propagate to linked beats
+            for linked in self.linked_beats:
+                linked.set_duration(self._duration)
+
         if parent and parent.constrained():
             parent.enact_local_constraints()
 
@@ -169,7 +179,7 @@ class Beat:
         # Careful! Demands that all of the unconstrained beats sort themselves out
         return sum([u_b.duration() for u_b in self.unconstrained_beats])
 
-    def duration(self, demand_predefined=False):
+    def duration(self, demand_predefined=False, search_links=True):
         if self.has_duration():
             return self._duration
         if demand_predefined:
@@ -179,9 +189,24 @@ class Beat:
         # Reach up recursively for a duration; eventually we must hit one.
         parent = self.parent
         if not parent:
+            if not search_links:
+                return None
+            link_dur = None
+            if search_links and self.linked_beats:
+                for linked in self.linked_beats:
+                    new_link_dur = linked.duration(search_links=False)
+                    if link_dur is not None and new_link_dur is not None and \
+                            not Beat.durations_close(link_dur, new_link_dur):
+                        print "Two different linked durations were constrained differently"
+                        self.overconstrained_tree()
+                    link_dur = new_link_dur
+            if link_dur:
+                self._duration = link_dur
+                return self._duration
             print "I guess no assignment to", self.label + \
                     "'s subtree ever made it up this high."
             self.underconstrained_tree()
+
         if self.size:
             self._duration = (parent.duration() - parent.unconstrained_duration())* \
                     self.size

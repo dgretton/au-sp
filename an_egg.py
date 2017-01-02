@@ -6,7 +6,7 @@ import numpy as np
 tonic_freq = PitchedSound.note_frequency("F#", 3)
 tempo_dur = 2.6/7
 
-datadir = os.path.expanduser("~/.mu-sp")
+datadir = os.path.expanduser("~/.au-sp")
 
 def aulib(sound_dir):
     return os.path.join(datadir, "audio", sound_dir)

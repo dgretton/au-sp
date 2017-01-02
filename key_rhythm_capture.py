@@ -1,8 +1,13 @@
 import Tkinter as tk
-import time, string, sys
+import time, string, sys, os
+
+datadir = os.path.expanduser("~/.au-sp")
+
+def rhlib(rh_name):
+    return os.path.join(datadir, "rhythm", rh_name + (".rh" if rh_name[-3:] != ".rh" else ''))
 
 try:
-    out_file = sys.argv[1]
+    out_file = rhlib(sys.argv[1])
 except:
     print "Provide name of file in which to save results as first argument."
     exit()
