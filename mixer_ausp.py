@@ -52,7 +52,8 @@ class Mixer:
         self._pyaudio_play('sound_temp.wav')
 
     def render_to_file(self, out_file_name, t0=None, t1=None, quick_play=False):
-        check_file_free = open(out_file_name, 'w').close()
+        if os.path.isfile(out_file_name):
+            check_file_free = open(out_file_name).close()
         Sound.quick_play = quick_play
         if not t0:
             t0 = min([track.start_time() for track in self.tracks])
