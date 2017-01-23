@@ -55,6 +55,9 @@ class Beat:
             beats_for_labels[label].append(beat)
         return beats_for_labels
 
+    def clear(self):
+        self.beats = []
+
     def link(self, lunk):
         if lunk is self:
             print "You probably didn't mean to link a beat to itself..."
