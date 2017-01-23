@@ -128,6 +128,9 @@ class RawSound(Sound):
 
     def _render_from(self, location):
         mono_data = self._read_mono_data(self.file_path)
+        if len(mono_data.shape) == 2:
+            print "warning: mixing down stereo library sound to mono."
+            mono_data = np.sum(mono_data, axis=1)
         if location is None:
             return (self.reg_pt, mono_data)
         return (self.reg_pt, self._to_stereo(self.rate, mono_data, location))
