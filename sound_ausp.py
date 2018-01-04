@@ -142,6 +142,37 @@ class RawSound(Sound):
                 self._duration = frames / float(self.rate)
         return self._duration
 
+
+class ShiftedSound(Sound):
+
+    def __init__(self, sound, shift_forward):
+        self.sound = sound
+        self.shift = shift_forward
+        self._duration = None
+        self.cache_tag = sound.cache_tag
+        self.set_unique_rate(sound.rate)
+        self.default_aural_space = sound.default_aural_space
+        self.cache_status = Sound.CacheStatus.no_cache
+
+    def _render_from(self, location):
+        reg_pt, data = self.sound.render_from(location)
+        if len(data.shape) == 1:
+            num_samples = data.shape[0]
+        else:
+            num_samples = data.shape[1]
+        data_dur = float(num_samples)/self.rate
+        new_reg_pt = reg_pt - self.shift
+        if not (0 < new_reg_pt < data_dur):
+            print 'Shifted sound would put registration point off sample, that is NAUGHTY'
+            exit()
+        return new_reg_pt, data
+
+    def duration(self):
+        if self._duration is None:
+            self._duration = self.sound.duration()
+        return self._duration
+
+
 class RandomSound(Sound):
 
     def __init__(self, sounds=None, cache=False):
@@ -261,7 +292,7 @@ class ClippedSound(Sound):
         self.default_aural_space = Sound.default_aural_space
         if offset < 0 or offset > clip_duration:
             print "EEEW NEEW You can't initialize a Clipped Sound that might put the registration point off the sample."
-            return
+            exit()
         self.offset = offset
         self.cache_tag = "ClSsnd(" + sound.cache_tag + "dr" + str(int(clip_duration*1000)) + \
                 "os" + str(int(offset*1000))
@@ -275,6 +306,8 @@ class ClippedSound(Sound):
 
     def _render_from(self, location):
         reg_pt, sound_data = self.sound.render_from(location)
+        if location is None:
+            sound_data = np.vstack((sound_data, np.zeros((sound_data.shape[0]))))
         cap_offset = len(self.cap)/2
         start_index = int((reg_pt - self.offset) * self.rate - cap_offset)
         end_index = start_index + int(self.clip_duration * self.rate) + \
@@ -291,6 +324,8 @@ class ClippedSound(Sound):
         clipped_data[:, : len(cap)] = clipped_data[:, : len(cap)] * cap
         clipped_data[:, -len(cap) :] = clipped_data[:, -len(cap) :] * \
                 cap[::-1]
+        if location is None:
+            clipped_data = clipped_data[0]
         return new_reg_pt, clipped_data
 
 

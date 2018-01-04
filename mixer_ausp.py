@@ -1,4 +1,4 @@
-import wave, struct, pyaudio
+import wave, struct, os
 from sound_ausp import Sound
 import numpy as np
 
@@ -6,6 +6,14 @@ import numpy as np
 class Mixer:
 
     attenuation_boost = 1
+    WINDOWS = 1
+    MAC = 2
+    ostype = None
+    if os.path.isfile('win.ostype'):
+        ostype = WINDOWS
+        import pyaudio
+    elif os.path.isfile('mac.ostype'):
+        ostype = MAC
 
     def __init__(self, name, rate=Sound.default_rate, tracks=[]):
         self.name = name
@@ -15,41 +23,43 @@ class Mixer:
     def set_rate(self, rate):
         self.rate = rate
 
-    def _pyaudio_play(self, wavname):
-        wf = wave.open(wavname, 'rb')
-        if wf.getframerate() != self.rate:
-            print "Don't play back a work with the wrong rate!"
-            exit()
-        p = pyaudio.PyAudio()
-        stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                                channels=wf.getnchannels(),
-                                rate=wf.getframerate(),
-                                output=True)
-        chunksize = 1024
-        data = wf.readframes(chunksize)
-        while data != '':
-            stream.write(data)
+    @staticmethod
+    def _os_audio_play(wavname):
+        if Mixer.ostype == Mixer.MAC:
+            os.system('afplay ' + wavname)
+            return
+        if Mixer.ostype == Mixer.WINDOWS:
+            wf = wave.open(wavname, 'rb')
+            if wf.getframerate() != self.rate:
+                print "Don't play back a work with the wrong rate!"
+                exit()
+            p = pyaudio.PyAudio()
+            stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                                    channels=wf.getnchannels(),
+                                    rate=wf.getframerate(),
+                                    output=True)
+            chunksize = 1024
             data = wf.readframes(chunksize)
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
+            while data != '':
+                stream.write(data)
+                data = wf.readframes(chunksize)
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+            return
+        print 'ignoring play call because operating system not known'
 
     def play(self, t0=0, t1=None, quick_play=True):
         self.render_to_file('temp.wav', t0, t1, quick_play=quick_play)
         print "Begin playback."
-        self._pyaudio_play('temp.wav')
+        Mixer._os_audio_play('temp.wav')
 
     def play_beat(self, beat, quick_play=True):
         self.play(beat.time(), beat.time() + beat.duration(), quick_play)
 
-    @staticmethod
-    def play_sound(sound, location, number=1, quick_play=True):
-        Sound.quick_play = quick_play
-        buffer = np.array([[],[]])
-        for n in range(number):
-            buffer = np.hstack((buffer, sound.render_from(location)[1]))
-        Mixer.write_to_file(sound.rate, "sound_temp.wav", buffer)
-        self._pyaudio_play('sound_temp.wav')
+    def play_sound(self, sound, *args, **kwargs):
+        Mixer.render_sound_to_file(sound, 'sound_temp.wav', *args, **kwargs)
+        Mixer._os_audio_play('sound_temp.wav')
 
     def render_to_file(self, out_file_name, t0=None, t1=None, quick_play=False):
         if os.path.isfile(out_file_name):
@@ -63,6 +73,20 @@ class Mixer:
         for track in self.tracks:
             data_buffer = track.mix_into(t0, data_buffer)
         Mixer.write_to_file(self.rate, out_file_name, data_buffer)
+
+    @staticmethod
+    def render_sound_to_file(sound, wavname, location=None, repeats=1, quick_play=True):
+        if not wavname:
+            print 'Must supply a name for the file to which to render a sound!'
+            return
+        Sound.quick_play = quick_play
+        buffer = np.array([[],[]])
+        for n in range(repeats):
+            sound_data = sound.render_from(location)[1]
+            if len(sound_data.shape) == 1:
+                sound_data = [sound_data, sound_data]
+            buffer = np.hstack((buffer, sound_data))
+        Mixer.write_to_file(sound.rate, wavname, buffer)
 
     @staticmethod
     def write_to_file(rate, out_file_name, buffer):
