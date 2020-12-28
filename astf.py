@@ -5,7 +5,7 @@ import scipy.io.wavfile as wavfile
 from numpy import exp, pi
 from mpl_toolkits.mplot3d import Axes3D
 from math import radians, degrees, log
-from ausp import Location
+from .location import Location
 
 class ASTF:
 

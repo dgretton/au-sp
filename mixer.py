@@ -1,19 +1,14 @@
 import wave, struct, os
-from sound_ausp import Sound
+from .sound import Sound
+from ausp import OSTYPE, WIN_OSTYPE, MAC_OSTYPE
 import numpy as np
 
 
 class Mixer:
 
     attenuation_boost = 1
-    WINDOWS = 1
-    MAC = 2
-    ostype = None
-    if os.path.isfile('win.ostype'):
-        ostype = WINDOWS
+    if OSTYPE == WIN_OSTYPE:
         import pyaudio
-    elif os.path.isfile('mac.ostype'):
-        ostype = MAC
 
     def __init__(self, name, rate=Sound.default_rate, tracks=[]):
         self.name = name
@@ -25,10 +20,10 @@ class Mixer:
 
     @staticmethod
     def _os_audio_play(wavname):
-        if Mixer.ostype == Mixer.MAC:
+        if OSTYPE == MAC_OSTYPE:
             os.system('afplay ' + wavname)
             return
-        if Mixer.ostype == Mixer.WINDOWS:
+        if OSTYPE == WIN_OSTYPE:
             wf = wave.open(wavname, 'rb')
             if wf.getframerate() != self.rate:
                 print "Don't play back a work with the wrong rate!"

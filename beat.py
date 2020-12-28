@@ -65,7 +65,6 @@ class Beat:
         if lunk not in self.linked_beats:
             print "linked", self, "to", lunk
             if lunk.has_duration():
-                print "I GOT EXECUTED< HAPPY DAY>"
                 self.set_duration(lunk.duration())
             self.linked_beats.append(lunk)
             lunk.link(self)
@@ -120,7 +119,7 @@ class Beat:
         parent = self.parent
         if self.has_duration() and self.size and parent \
                 and parent.constrained():
-            print self, "setting duration of parent", parent
+            #print self, "setting duration of parent", parent
             parent.set_duration(self._duration/self.size + \
                     parent.unconstrained_duration())
             return
@@ -142,7 +141,7 @@ class Beat:
                 for forced_beat in c_beats:
                     if forced_beat is defined_beat:
                         continue
-                    print defined_beat, "forcing sibling beat", forced_beat
+                    #print defined_beat, "forcing sibling beat", forced_beat
                     # quietly assign durations to siblings, no higher recursion
                     forced_beat.set_duration(c_beat_shared_dur*forced_beat.size,
                             recurse=False)
@@ -169,7 +168,8 @@ class Beat:
                     for ou in other_unconstrained]))
             self.enact_local_constraints()
         else:
-            print "waiting on", ','.join([str(dof) for dof in dof_list])
+            #print "waiting on", ','.join([str(dof) for dof in dof_list])
+            pass
 
         if self.has_duration(): # New assignment was made: propagate to linked beats
             for linked in self.linked_beats:

@@ -1,9 +1,10 @@
-from ausp import Beat
+from .beat import Beat
+from ausp import DEFAULT_RATE
 import numpy as np
 
 class Track:
 
-    def __init__(self, name, rate, duration=None, start_time=None, volume=1.0,
+    def __init__(self, name, rate=DEFAULT_RATE, duration=None, start_time=None, volume=1.0,
             padding=.1, end_padding=None):
         self.name = name
         self.rate = rate
@@ -107,8 +108,8 @@ class Track:
                 start_index = int(sound_start_time * self.rate) + \
                         self.pre_padding_samples
                 if start_index < 0:
-                    start_index = 0
                     sound_data = sound_data[:, -start_index:]
+                    start_index = 0
                 end_index = start_index + sound_data.shape[1]
                 if end_index > self.total_samples:
                     end_index = self.total_samples

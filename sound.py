@@ -1,4 +1,5 @@
-from ausp import Track, Location, EarDelayAuralSpace, DiscreteEarDelayAS, KemarAuralSpace
+from ausp import (Track, Location, EarDelayAuralSpace, DiscreteEarDelayAS, KemarAuralSpace,
+    DEFAULT_RATE)
 import os, contextlib, wave, random
 import numpy as np
 from math import sqrt, atan2, log, pi
@@ -8,7 +9,7 @@ from matplotlib import pyplot as plt
 class Sound:
 
     quick_play = False
-    default_rate = 44100
+    default_rate = DEFAULT_RATE # for backward compatibility
     default_aural_space = KemarAuralSpace('whatifitworks', default_rate)
 
     class CacheStatus:
@@ -42,7 +43,7 @@ class Sound:
             if isinstance(cached, tuple):
                 # Hit! Another sound similar enough to this one to replace it
                 # was rendered here enough times in a row that it was cached.
-                print "got a cache!"
+                #print "got a cache!"
                 return cached 
             hits = cached + 1
             if hits == Sound.CacheStatus.hits_before_cache:

@@ -19,6 +19,7 @@ random_mid_drum.populate_with_dir(aulib('long_low_tom'))
 random_mid_drum.populate_with_dir(aulib('short_low_tom'))
 random_mid_drum.populate_with_dir(aulib('long_high_tom'))
 random_mid_drum.populate_with_dir(aulib('short_high_tom'))
+random_mid_drum.populate_with_dir(aulib('cymbal_long'))
 mid_drum = SpreadSound(random_mid_drum, (.2, .2, 0), 0, 1)
 
 random_viols = RandomPitchedSound()
@@ -30,7 +31,7 @@ random_xylo.populate_with_dir(aulib('g_major_xylo'))
 raw_bassy = RawPitchedSound(aulib('werb_sine') + '/werb_sine.0.110.wav')
 #raw_bassy = RawPitchedSound(aulib('voice_oo') + '/loud.0.287.wav')
 #raw_bassy = RawPitchedSound(aulib('rasp_bass') + '/rasp_bass_1.0.110.wav')
-raw_bassy = RawPitchedSound(aulib('bowed_violin') + '/bowed_violin_2.146.D_4.wav')
+#raw_bassy = RawPitchedSound(aulib('bowed_violin') + '/bowed_violin_2.146.D_4.wav')
 #raw_bassy = RawPitchedSound(aulib('crystal_ding') + '/crystal_ding.20.1313.wav')
 
 bass_pulse = RandomSound()
@@ -171,8 +172,10 @@ def six_chords(beat, bassy_dict = {}):
     for shaker in shakers:
         dur = eighth_dur*8*6*2
         for i in range(2):
-            track_beat.attach(ClippedSound(shaker.for_interval(dur), dur*.99, margin=dur*.4), spreadloc(1.0*(i*3+1)))
-    for meas_beat, viol_meas_beat, chord in zip(track_beat.split_even(6), viols_beat.split_even(6), chords):
+            track_beat.attach(ClippedSound(shaker.for_interval(dur), dur*.99, margin=dur*.4),
+                    spreadloc(1.0*(i*3+1)))
+    for meas_beat, viol_meas_beat, chord in zip(track_beat.split_even(6),
+                viols_beat.split_even(6), chords):
         if chord != last_chord:
             arpeggiator = random_arpeggiate(chord, jitter=1, start_octave=3)
             viol_arpeggiator = random_arpeggiate(chord, jitter=len(chord)-1, start_octave=4)

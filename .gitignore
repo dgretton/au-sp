@@ -3,4 +3,5 @@
 *.wav
 *.swp
 *.rh
-*.ostype
+ostype.py
+util/dice
